@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LinkUp - Luxury Social Network</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0A0B0E;
+      --surface-card: #14161B;
+      --surface-elevated: #1B1E26;
+      --accent-gold: #C8A265;
+      --accent-gold-hover: #DFBA7E;
+      --accent-bronze: #8C734B;
+      --text-primary: #F5F5F7;
+      --text-secondary: #8E929B;
+      --border-subtle: #232730;
+      --font-brand: 'Cinzel', serif;
+      --font-body: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    #app-container {
+      width: 100%;
+      max-width: 480px;
+      height: 100vh;
+      background: var(--bg-primary);
+      border-left: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* شاشة المصادقة */
+    #auth-screen {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-primary);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 22px;
+      overflow-y: auto;
+    }
+
+    .auth-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 26px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+    }
+
+    .auth-brand {
+      text-align: center;
+      font-family: var(--font-brand);
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #FFF1CE 0%, var(--accent-gold) 50%, var(--accent-bronze) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .auth-input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .auth-input-group label {
+      font-size: 12px;
+      color: var(--accent-gold);
+    }
+
+    .forgot-link-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .forgot-link-btn:hover {
+      color: var(--accent-gold);
+      text-decoration: underline;
+    }
+
+    .auth-input {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #FFF;
+      font-family: var(--font-body);
+      outline: none;
+      font-size: 14px;
+    }
+
+    .auth-input:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .gold-btn {
+      background: linear-gradient(135deg, #FFE3A3 0%, var(--accent-gold) 60%, var(--accent-bronze) 100%);
+      border: none;
+      color: #0A0B0E;
+      font-weight: 700;
+      font-family: var(--font-body);
+      padding: 13px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+
+    .gold-btn:active {
+      opacity: 0.85;
+    }
+
+    /* زر Google المحدث */
+    .google-btn {
+      background: #FFFFFF;
+      color: #1F1F1F;
+      border: none;
+      font-weight: 600;
+      font-family: var(--font-body);
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.2s;
+    }
+
+    .google-btn:hover {
+      background: #EBEBEB;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin: 2px 0;
+    }
+
+    .auth-divider::before, .auth-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    /* زر التبديل الفعلي لإنشاء حساب بدلاً من مجرد نص */
+    .switch-mode-btn {
+      background: var(--surface-elevated);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      border-radius: 12px;
+      padding: 11px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      margin-top: 4px;
+    }
+
+    .switch-mode-btn:active {
+      background: var(--surface-card);
+      transform: scale(0.98);
+    }
+
+    /* حقل الـ OTP */
+    .otp-code-input {
+      letter-spacing: 10px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+
+    /* الهيدر العلوي */
+    .top-header {
+      height: 60px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(10, 11, 14, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 50;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .brand-logo {
+      font-family: var(--font-brand);
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #FFF1CE 0%, var(--accent-gold) 50%, var(--accent-bronze) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-btn {
+      background: none;
+      border: none;
+      color: var(--accent-gold);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* شاشات المحتوى */
+    .main-viewport {
+      flex: 1;
+      margin-top: 60px;
+      margin-bottom: 65px;
+      overflow-y: auto;
+    }
+
+    .main-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100%;
+      flex-direction: column;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* الستوريز */
+    .stories-container {
+      display: flex;
+      gap: 14px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-card);
+    }
+
+    .stories-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .story-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .story-ring {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      padding: 2.5px;
+      background: linear-gradient(45deg, var(--accent-bronze), var(--accent-gold), #FFE4A0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .story-ring.add-story {
+      background: var(--surface-elevated);
+      border: 1px dashed var(--accent-gold);
+    }
+
+    .story-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--bg-primary);
+    }
+
+    .story-username {
+      font-size: 11px;
+      color: var(--text-secondary);
+      max-width: 66px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* المنشورات */
+    .post-card {
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 8px;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+    }
+
+    .post-user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .post-user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--accent-gold);
+    }
+
+    .follow-btn {
+      background: transparent;
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .post-media-box {
+      width: 100%;
+      background: #000;
+    }
+
+    .post-media {
+      width: 100%;
+      max-height: 480px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px 6px 16px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 19px;
+    }
+
+    .action-btn.liked {
+      color: #E24B4B;
+    }
+
+    .post-caption {
+      padding: 0 16px 14px 16px;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* مشغل الريلز */
+    #screen-reels {
+      height: 100%;
+      background: #000;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+    }
+
+    .reel-container {
+      height: 100%;
+      width: 100%;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+
+    .reel-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .reel-overlay {
+      position: absolute;
+      bottom: 20px;
+      right: 16px;
+      left: 70px;
+      z-index: 10;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    }
+
+    /* الشات الفوري */
+    #screen-chat {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message-bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 13.5px;
+      word-break: break-word;
+    }
+
+    .message-bubble.sent {
+      align-self: flex-start;
+      background: linear-gradient(135deg, var(--accent-bronze), var(--accent-gold));
+      color: #0A0B0E;
+      font-weight: 500;
+      border-bottom-left-radius: 2px;
+    }
+
+    .message-bubble.received {
+      align-self: flex-end;
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-input-bar {
+      padding: 10px 14px;
+      background: var(--surface-card);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-input-bar input {
+      flex: 1;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 9px 16px;
+      color: #FFF;
+      outline: none;
+    }
+
+    /* البروفايل */
+    .profile-hero {
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .profile-large-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent-gold);
+      padding: 3px;
+    }
+
+    .stats-row {
+      display: flex;
+      width: 100%;
+      justify-content: space-around;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* شريط التنقل */
+    .bottom-navbar {
+      height: 65px;
+      background: rgba(14, 16, 21, 0.95);
+      border-top: 1px solid var(--border-subtle);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-tab {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 19px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+    }
+
+    .nav-tab.active {
+      color: var(--accent-gold);
+    }
+
+    .nav-tab span {
+      font-size: 10px;
+    }
+
+    .add-action-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFE3A3 0%, var(--accent-gold) 60%, var(--accent-bronze) 100%);
+      border: none;
+      color: #0A0B0E;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-top: -15px;
+    }
+
+    /* المودالز */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 150;
+      display: none;
+      align-items: flex-end;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .bottom-sheet {
+      width: 100%;
+      background: var(--surface-card);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 22px 18px;
+      border-top: 1px solid var(--accent-gold);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hidden-file-input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-container">
+
+    <!-- شاشة المصادقة: تسجيل الدخول / إنشاء حساب / تأكيد OTP / استعادة كلمة المرور / Google -->
+    <div id="auth-screen">
+      <div class="auth-card">
+        <div class="auth-brand">LINKUP</div>
+        <p style="text-align: center; font-size: 13px; color: var(--text-secondary);" id="auth-subtitle">سجّل دخولك لمجتمع الفخامة والخصوصية</p>
+        
+        <!-- حقول نموذج الدخول والتسجيل -->
+        <div id="auth-fields-container" style="display: flex; flex-direction: column; gap: 12px;">
+          
+          <div class="auth-input-group" id="group-username" style="display: none;">
+            <label>اسم المستخدم (Unique Handle)</label>
+            <input type="text" id="auth-username" class="auth-input" placeholder="ziyad_mira">
+          </div>
+
+          <div class="auth-input-group">
+            <label>البريد الإلكتروني (Gmail)</label>
+            <input type="email" id="auth-email" class="auth-input" placeholder="name@gmail.com">
+          </div>
+
+          <div class="auth-input-group" id="group-password">
+            <div class="auth-input-header">
+              <label>كلمة المرور</label>
+              <!-- زر نسيت كلمة المرور الصغير -->
+              <button type="button" class="forgot-link-btn" id="forgot-btn" onclick="openForgotPassword()">هل نسيت كلمة المرور؟</button>
+            </div>
+            <input type="password" id="auth-password" class="auth-input" placeholder="••••••••">
+          </div>
+
+          <button class="gold-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">تسجيل الدخول</button>
+
+          <div class="auth-divider">أو</div>
+
+          <!-- زر التسجيل عبر Google -->
+          <button type="button" class="google-btn" id="google-auth-btn" onclick="signInWithGoogle()">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.36 7.31 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2.0 10.05.0 12s.46 3.8.127 5.42l4.01-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.64 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            المتابعة باستخدام Google
+          </button>
+
+          <!-- زر تحويل الوضع من تسجيل دخول إلى إنشاء حساب -->
+          <button type="button" class="switch-mode-btn" id="switch-mode-btn" onclick="toggleAuthMode()">
+            <i class="fa-solid fa-user-plus"></i>
+            <span id="switch-btn-text">ليس لديك حساب؟ أنشئ حساباً الآن</span>
+          </button>
+        </div>
+
+        <!-- واجهة إدخال رمز التحقق OTP -->
+        <div id="otp-container" style="display: none; flex-direction: column; gap: 14px;">
+          <p style="font-size: 13px; text-align: center; color: var(--accent-gold);" id="otp-hint-text">
+            تم إرسال رمز تحقق حقيقي إلى بريدك الإلكتروني. يرجى إدخال الرمز المكون من 6 أرقام:
+          </p>
+          <input type="text" id="otp-code-input" class="auth-input otp-code-input" maxlength="6" placeholder="000000">
+          <button class="gold-btn" id="verify-otp-action-btn" onclick="verifyEmailOtp()">تأكيد الرمز والدخول</button>
+          <button type="button" style="background: transparent; border: none; text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 13px;" onclick="cancelOtp()">الرجوع</button>
+        </div>
+
+        <!-- واجهة استعادة كلمة المرور -->
+        <div id="forgot-password-container" style="display: none; flex-direction: column; gap: 14px;">
+          <p style="font-size: 13px; text-align: center; color: var(--accent-gold);">
+            أدخل بريدك الإلكتروني وسنرسل لك رمزاً لإعادة تعيين كلمة المرور فوراً:
+          </p>
+          <input type="email" id="forgot-email-input" class="auth-input" placeholder="name@gmail.com">
+          <button class="gold-btn" onclick="sendPasswordResetOtp()">إرسال رمز الاستعادة</button>
+          <button type="button" style="background: transparent; border: none; text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 13px;" onclick="cancelForgotPassword()">الرجوع لتسجيل الدخول</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- الهيدر العلوي -->
+    <header class="top-header">
+      <div class="brand-logo">LINKUP</div>
+      <div>
+        <button class="header-btn" onclick="logout()" title="تسجيل الخروج"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+      </div>
+    </header>
+
+    <!-- مساحة الشاشات الرئيسية -->
+    <main class="main-viewport">
+      
+      <!-- 1. شاشة الـ Feed الرئيسية -->
+      <section id="screen-home" class="screen active">
+        <div class="stories-container" id="stories-tray">
+          <div class="story-item" onclick="triggerStoryUpload()">
+            <div class="story-ring add-story">
+              <i class="fa-solid fa-plus" style="color: var(--accent-gold);"></i>
+            </div>
+            <span class="story-username">قصتك</span>
+          </div>
+        </div>
+        <div id="posts-feed-container"></div>
+      </section>
+
+      <!-- 2. شاشة الريلز -->
+      <section id="screen-reels" class="screen">
+        <div id="reels-feed-container" style="height: 100%;"></div>
+      </section>
+
+      <!-- 3. شاشة الشات الفوري -->
+      <section id="screen-chat" class="screen">
+        <div class="chat-messages" id="chat-messages-container"></div>
+        <div class="chat-input-bar">
+          <input type="text" id="chat-input-text" placeholder="اكتب رسالة فورية مشفرة..." onkeypress="if(event.key === 'Enter') sendRealtimeMessage()">
+          <button class="header-btn" onclick="sendRealtimeMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </section>
+
+      <!-- 4. شاشة البروفايل -->
+      <section id="screen-profile" class="screen">
+        <div class="profile-hero">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="profile-large-avatar" id="prof-avatar" alt="Avatar">
+          <h3 id="prof-name" style="margin-top: 10px;">جاري التحميل...</h3>
+          <p id="prof-handle" style="color: var(--accent-gold); font-size: 13px;">@handle</p>
+          <div class="stats-row">
+            <div><b id="stat-posts">0</b><p style="font-size: 11px; color: var(--text-secondary);">منشورات</p></div>
+            <div><b id="stat-followers">0</b><p style="font-size: 11px; color: var(--text-secondary);">متابعين</p></div>
+            <div><b id="stat-following">0</b><p style="font-size: 11px; color: var(--text-secondary);">أتابعهم</p></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- شريط التنقل السفلي الفاخر -->
+    <nav class="bottom-navbar">
+      <button class="nav-tab active" onclick="switchTab('screen-home', this)"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+      <button class="nav-tab" onclick="switchTab('screen-reels', this)"><i class="fa-solid fa-play"></i><span>الريلز</span></button>
+      <button class="add-action-btn" onclick="openCreateSheet()"><i class="fa-solid fa-plus"></i></button>
+      <button class="nav-tab" onclick="switchTab('screen-chat', this)"><i class="fa-regular fa-comment-dots"></i><span>المحادثات</span></button>
+      <button class="nav-tab" onclick="switchTab('screen-profile', this)"><i class="fa-regular fa-user"></i><span>حسابي</span></button>
+    </nav>
+
+    <!-- نافذة النشر -->
+    <div class="modal-overlay" id="create-modal" onclick="closeModals()">
+      <div class="bottom-sheet" onclick="event.stopPropagation()">
+        <h4 style="color: var(--accent-gold); text-align: center; margin-bottom: 8px;">محتوى حقيقي جديد</h4>
+        <button class="gold-btn" style="background: var(--surface-elevated); color: #FFF; border: 1px solid var(--border-subtle);" onclick="triggerUpload('image', false)">
+          <i class="fa-regular fa-image" style="color: var(--accent-gold); margin-left: 8px;"></i> نشر صورة
+        </button>
+        <button class="gold-btn" style="background: var(--surface-elevated); color: #FFF; border: 1px solid var(--border-subtle);" onclick="triggerUpload('video', true)">
+          <i class="fa-solid fa-video" style="color: var(--accent-gold); margin-left: 8px;"></i> رفع فيديو للريلز
+        </button>
+      </div>
+    </div>
+
+    <!-- حقول رفع الوسائط -->
+    <input type="file" id="media-file-input" class="hidden-file-input" onchange="handleFileSelected(event)">
+    <input type="file" id="story-file-input" class="hidden-file-input" accept="image/*,video/*" onchange="handleStorySelected(event)">
+
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. إعدادات SUPABASE الحقيقية
+       ========================================================================= */
+    const SUPABASE_URL = "https://dnanckdyglezgjaxksey.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_7hUZqoIEYPf2EPtmtMjzVw_RboLexpp";
+
+    let supabase = null;
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) {
+      console.warn("Supabase not yet configured:", e);
+    }
+
+    let currentUser = null;
+    let isRegisterMode = false;
+    let pendingVerificationEmail = "";
+    let isRecoveryFlow = false;
+    let pendingUploadConfig = { type: 'image', isReel: false };
+    let globalChatChannel = null;
+
+    /* =========================================================================
+       2. منطق المصادقة والتبديل (AUTH & MODE TOGGLE)
+       ========================================================================= */
+    function toggleAuthMode() {
+      isRegisterMode = !isRegisterMode;
+      const usernameGroup = document.getElementById('group-username');
+      const forgotBtn = document.getElementById('forgot-btn');
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const subtitle = document.getElementById('auth-subtitle');
+      const switchBtnText = document.getElementById('switch-btn-text');
+
+      if (isRegisterMode) {
+        usernameGroup.style.display = 'flex';
+        forgotBtn.style.display = 'none';
+        submitBtn.innerText = 'إرسال رمز التأكيد للجيميل';
+        subtitle.innerText = 'انضم لمجتمع LinkUp واستلم كود التفعيل الملكي';
+        switchBtnText.innerText = 'لديك حساب بالفعل؟ سجّل دخولك الآن';
+      } else {
+        usernameGroup.style.display = 'none';
+        forgotBtn.style.display = 'block';
+        submitBtn.innerText = 'تسجيل الدخول';
+        subtitle.innerText = 'سجّل دخولك لمجتمع الفخامة والخصوصية';
+        switchBtnText.innerText = 'ليس لديك حساب؟ أنشئ حساباً الآن';
+      }
+    }
+
+    async function handleAuthSubmit() {
+      if (!supabase) return alert("يرجى وضع روابط Supabase الصحيحة في السكريبت أولاً.");
+      
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+      const username = document.getElementById('auth-username').value.trim();
+
+      if (!email) return alert("يرجى كتابة البريد الإلكتروني");
+
+      if (isRegisterMode) {
+        if (!username) return alert("يرجى كتابة اسم المستخدم (Handle)");
+        if (!password || password.length < 6) return alert("كلمة المرور يجب ألا تقل عن 6 أحرف");
+
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: { data: { username: username, full_name: username } }
+        });
+
+        if (error) return alert("خطأ في إنشاء الحساب: " + error.message);
+
+        pendingVerificationEmail = email;
+        isRecoveryFlow = false;
+        document.getElementById('auth-fields-container').style.display = 'none';
+        document.getElementById('otp-container').style.display = 'flex';
+        document.getElementById('otp-hint-text').innerText = "تم إرسال رمز تحقق حقيقي إلى جيميلك (" + email + "). أدخل الرمز المكون من 6 أرقام:";
+      } else {
+        if (!password) return alert("يرجى إدخال كلمة المرور");
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return alert("فشل تسجيل الدخول: " + error.message);
+        checkSession();
+      }
+    }
+
+    /* =========================================================================
+       3. تسجيل الدخول عبر Google OAuth المحدث
+       ========================================================================= */
+    async function signInWithGoogle() {
+      if (!supabase) return alert("يرجى وضع روابط Supabase أولاً");
+      
+      try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.href.split('#')[0]
+          }
+        });
+        if (error) throw error;
+      } catch (err) {
+        alert("حدث خطأ في Google OAuth: " + err.message + "\nتأكد من تفعيل موفر Google وإدخال Client ID & Secret في لوحة تحكم Supabase.");
+      }
+    }
+
+    /* =========================================================================
+       4. نظام "هل نسيت كلمة المرور؟" و OTP
+       ========================================================================= */
+    function openForgotPassword() {
+      const emailVal = document.getElementById('auth-email').value.trim();
+      if (emailVal) document.getElementById('forgot-email-input').value = emailVal;
+      document.getElementById('auth-fields-container').style.display = 'none';
+      document.getElementById('forgot-password-container').style.display = 'flex';
+    }
+
+    function cancelForgotPassword() {
+      document.getElementById('forgot-password-container').style.display = 'none';
+      document.getElementById('auth-fields-container').style.display = 'flex';
+    }
+
+    async function sendPasswordResetOtp() {
+      const email = document.getElementById('forgot-email-input').value.trim();
+      if (!email) return alert("يرجى إدخال بريدك الإلكتروني المسجل");
+
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) return alert("خطأ: " + error.message);
+
+      pendingVerificationEmail = email;
+      isRecoveryFlow = true;
+      document.getElementById('forgot-password-container').style.display = 'none';
+      document.getElementById('otp-container').style.display = 'flex';
+      document.getElementById('otp-hint-text').innerText = "تم إرسال كود استعادة كلمة المرور إلى جيميلك (" + email + "). أدخل الرمز المكون من 6 أرقام:";
+    }
+
+    async function verifyEmailOtp() {
+      const token = document.getElementById('otp-code-input').value.trim();
+      if (!token || token.length < 6) return alert("يرجى إدخال الرمز كاملاً (6 أرقام)");
+
+      if (isRecoveryFlow) {
+        const { data, error } = await supabase.auth.verifyOtp({
+          email: pendingVerificationEmail,
+          token: token,
+          type: 'recovery'
+        });
+        if (error) return alert("رمز التحقق غير صحيح: " + error.message);
+        
+        const newPassword = prompt("أدخل كلمة المرور الجديدة:");
+        if (newPassword && newPassword.length >= 6) {
+          await supabase.auth.updateUser({ password: newPassword });
+          alert("تم تحديث كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول.");
+          cancelOtp();
+        }
+      } else {
+        const { data, error } = await supabase.auth.verifyOtp({
+          email: pendingVerificationEmail,
+          token: token,
+          type: 'signup'
+        });
+
+        if (error) {
+          const retry = await supabase.auth.verifyOtp({
+            email: pendingVerificationEmail,
+            token: token,
+            type: 'email'
+          });
+          if (retry.error) return alert("رمز التحقق غير صحيح: " + retry.error.message);
+        }
+
+        alert("تم تأكيد الحساب بنجاح! مرحباً بك في LinkUp.");
+        cancelOtp();
+        checkSession();
+      }
+    }
+
+    function cancelOtp() {
+      document.getElementById('otp-container').style.display = 'none';
+      document.getElementById('auth-fields-container').style.display = 'flex';
+      document.getElementById('otp-code-input').value = '';
+    }
+
+    /* =========================================================================
+       5. فحص الجلسة والتهيئة
+       ========================================================================= */
+    async function checkSession() {
+      if (!supabase) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user) {
+        currentUser = session.user;
+        document.getElementById('auth-screen').style.display = 'none';
+        initApp();
+      } else {
+        document.getElementById('auth-screen').style.display = 'flex';
+      }
+    }
+
+    async function logout() {
+      if (!supabase) return;
+      await supabase.auth.signOut();
+      currentUser = null;
+      document.getElementById('auth-screen').style.display = 'flex';
+    }
+
+    async function initApp() {
+      await Promise.all([
+        loadUserProfile(),
+        loadLivePosts(),
+        loadLiveStories(),
+        loadLiveReels(),
+        initRealtimeChat()
+      ]);
+    }
+
+    async function loadUserProfile() {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (profile) {
+        document.getElementById('prof-name').innerText = profile.full_name || profile.username;
+        document.getElementById('prof-handle').innerText = '@' + profile.username;
+        if (profile.avatar_url) document.getElementById('prof-avatar').src = profile.avatar_url;
+      }
+
+      const { count: followersCount } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', currentUser.id);
+      const { count: followingCount } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', currentUser.id);
+      const { count: postsCount } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+
+      document.getElementById('stat-followers').innerText = followersCount || 0;
+      document.getElementById('stat-following').innerText = followingCount || 0;
+      document.getElementById('stat-posts').innerText = postsCount || 0;
+    }
+
+    async function loadLivePosts() {
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select(`
+          id, caption, media_url, media_type, created_at, user_id,
+          profiles:user_id (id, username, full_name, avatar_url),
+          likes (user_id)
+        `)
+        .eq('is_reel', false)
+        .order('created_at', { ascending: false });
+
+      if (error) return;
+
+      const container = document.getElementById('posts-feed-container');
+      container.innerHTML = '';
+
+      posts.forEach(post => {
+        const isLiked = post.likes && post.likes.some(l => l.user_id === currentUser.id);
+        const card = document.createElement('article');
+        card.className = 'post-card';
+        card.innerHTML = `
+          <div class="post-header">
+            <div class="post-user-info">
+              <img src="${post.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}" class="post-user-avatar">
+              <div>
+                <div style="font-weight: 600; font-size: 13.5px;">${post.profiles?.full_name || post.profiles?.username}</div>
+                <div style="font-size: 11px; color: var(--text-secondary);">@${post.profiles?.username}</div>
+              </div>
+            </div>
+            ${post.user_id !== currentUser.id ? `
+              <button class="follow-btn" onclick="toggleFollowLive('${post.user_id}', this)">+ متابعة</button>
+            ` : ''}
+          </div>
+          <div class="post-media-box">
+            <img src="${post.media_url}" class="post-media">
+          </div>
+          <div class="post-actions">
+            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLikeLive('${post.id}', this)">
+              <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+            </button>
+          </div>
+          <div class="post-caption">
+            <b>${post.profiles?.username}</b> ${post.caption || ''}
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">${post.likes ? post.likes.length : 0} إعجاباً</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function loadLiveStories() {
+      const { data: stories } = await supabase
+        .from('stories')
+        .select('id, media_url, profiles:user_id(username, avatar_url)')
+        .order('created_at', { ascending: false });
+
+      const tray = document.getElementById('stories-tray');
+      tray.innerHTML = `
+        <div class="story-item" onclick="triggerStoryUpload()">
+          <div class="story-ring add-story"><i class="fa-solid fa-plus" style="color: var(--accent-gold);"></i></div>
+          <span class="story-username">قصتك</span>
+        </div>
+      `;
+
+      if (stories) {
+        stories.forEach(st => {
+          const item = document.createElement('div');
+          item.className = 'story-item';
+          item.innerHTML = `
+            <div class="story-ring">
+              <img src="${st.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}" class="story-avatar">
+            </div>
+            <span class="story-username">${st.profiles?.username}</span>
+          `;
+          tray.appendChild(item);
+        });
+      }
+    }
+
+    async function loadLiveReels() {
+      const { data: reels } = await supabase
+        .from('posts')
+        .select('id, caption, media_url, profiles:user_id(username)')
+        .eq('is_reel', true)
+        .order('created_at', { ascending: false });
+
+      const container = document.getElementById('reels-feed-container');
+      container.innerHTML = '';
+
+      if (reels) {
+        reels.forEach(reel => {
+          const item = document.createElement('div');
+          item.className = 'reel-container';
+          item.innerHTML = `
+            <video class="reel-video" src="${reel.media_url}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
+            <div class="reel-overlay">
+              <h4 style="color: var(--accent-gold); font-size: 14px;">@${reel.profiles?.username}</h4>
+              <p style="font-size: 13px;">${reel.caption || ''}</p>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+      }
+    }
+
+    async function toggleLikeLive(postId, btn) {
+      const { data: existingLike } = await supabase
+        .from('likes')
+        .select('*')
+        .eq('post_id', postId)
+        .eq('user_id', currentUser.id)
+        .single();
+
+      if (existingLike) {
+        await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+      } else {
+        await supabase.from('likes').insert([{ post_id: postId, user_id: currentUser.id }]);
+      }
+      loadLivePosts();
+    }
+
+    async function toggleFollowLive(targetUserId, btn) {
+      const { data: existingFollow } = await supabase
+        .from('follows')
+        .select('*')
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', targetUserId)
+        .single();
+
+      if (existingFollow) {
+        await supabase.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', targetUserId);
+      } else {
+        await supabase.from('follows').insert([{ follower_id: currentUser.id, following_id: targetUserId }]);
+      }
+      loadUserProfile();
+      loadLivePosts();
+    }
+
+    function openCreateSheet() { document.getElementById('create-modal').classList.add('active'); }
+    function closeModals() { document.getElementById('create-modal').classList.remove('active'); }
+
+    function triggerUpload(type, isReel) {
+      pendingUploadConfig = { type, isReel };
+      const fileInput = document.getElementById('media-file-input');
+      fileInput.accept = type === 'image' ? 'image/*' : 'video/*';
+      fileInput.click();
+    }
+
+    async function handleFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const caption = prompt("اكتب وصفاً للمنشور:");
+      closeModals();
+
+      const ext = file.name.split('.').pop();
+      const path = `posts/${currentUser.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage.from('posts').upload(path, file);
+      if (uploadError) return alert("فشل الرفع: " + uploadError.message);
+
+      const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(path);
+
+      await supabase.from('posts').insert([{
+        user_id: currentUser.id,
+        caption: caption,
+        media_url: publicUrl,
+        media_type: pendingUploadConfig.type,
+        is_reel: pendingUploadConfig.isReel
+      }]);
+
+      alert("تم النشر بنجاح!");
+      if (pendingUploadConfig.isReel) loadLiveReels();
+      else loadLivePosts();
+    }
+
+    function triggerStoryUpload() { document.getElementById('story-file-input').click(); }
+
+    async function handleStorySelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const ext = file.name.split('.').pop();
+      const path = `stories/${currentUser.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage.from('posts').upload(path, file);
+      if (uploadError) return alert("فشل الرفع: " + uploadError.message);
+
+      const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(path);
+
+      await supabase.from('stories').insert([{
+        user_id: currentUser.id,
+        media_url: publicUrl,
+        media_type: file.type.includes('video') ? 'video' : 'image'
+      }]);
+
+      alert("تمت إضافة القصة بنجاح!");
+      loadLiveStories();
+    }
+
+    async function initRealtimeChat() {
+      const { data: messages } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .limit(30);
+
+      const container = document.getElementById('chat-messages-container');
+      container.innerHTML = '';
+      if (messages) {
+        messages.forEach(msg => appendMessageUI(msg.content, msg.sender_id === currentUser.id));
+      }
+
+      if (globalChatChannel) supabase.removeChannel(globalChatChannel);
+
+      globalChatChannel = supabase
+        .channel('public:messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+          const newMsg = payload.new;
+          if (newMsg.sender_id !== currentUser.id) {
+            appendMessageUI(newMsg.content, false);
+          }
+        })
+        .subscribe();
+    }
+
+    async function sendRealtimeMessage() {
+      const input = document.getElementById('chat-input-text');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      appendMessageUI(text, true);
+
+      await supabase.from('messages').insert([{
+        conversation_id: "00000000-0000-0000-0000-000000000000",
+        sender_id: currentUser.id,
+        content: text
+      }]);
+    }
+
+    function appendMessageUI(text, isMe) {
+      const container = document.getElementById('chat-messages-container');
+      const bubble = document.createElement('div');
+      bubble.className = `message-bubble ${isMe ? 'sent' : 'received'}`;
+      bubble.innerText = text;
+      container.appendChild(bubble);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function switchTab(screenId, tabBtnElement = null) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+
+      if (tabBtnElement) {
+        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+        tabBtnElement.classList.add('active');
+      }
+
+      if (screenId !== 'screen-reels') {
+        document.querySelectorAll('.reel-video').forEach(v => v.pause());
+      } else {
+        const first = document.querySelector('.reel-video');
+        if (first) first.play();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', checkSession);
+  </script>
+</body>
+</html>
