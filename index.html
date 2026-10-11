@@ -1,1273 +1,604 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>LinkUp - Luxury Social Network</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Premiumak</title>
+  <meta name="description" content="اشتراكات رقمية بأسعار مميزة: كاب كت، جيميناى، يوتيوب، سبوتيفاى، كانفا وأكتر. اطلب عبر تيليجرام بسهولة." />
+  <meta name="theme-color" content="#06080e" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Supabase JS Client v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Cairo', 'sans-serif'] } } }
+    }
+  </script>
 
   <style>
-    :root {
-      --bg-primary: #0A0B0E;
-      --surface-card: #14161B;
-      --surface-elevated: #1B1E26;
-      --accent-gold: #C8A265;
-      --accent-gold-hover: #DFBA7E;
-      --accent-bronze: #8C734B;
-      --text-primary: #F5F5F7;
-      --text-secondary: #8E929B;
-      --border-subtle: #232730;
-      --font-brand: 'Cinzel', serif;
-      --font-body: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: var(--font-body);
-      overflow-x: hidden;
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    #app-container {
-      width: 100%;
-      max-width: 480px;
-      height: 100vh;
-      background: var(--bg-primary);
-      border-left: 1px solid var(--border-subtle);
-      border-right: 1px solid var(--border-subtle);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* شاشة المصادقة */
-    #auth-screen {
-      position: absolute;
-      inset: 0;
-      background: var(--bg-primary);
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 22px;
-      overflow-y: auto;
-    }
-
-    .auth-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 24px;
-      padding: 26px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
-    }
-
-    .auth-brand {
-      text-align: center;
-      font-family: var(--font-brand);
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #FFF1CE 0%, var(--accent-gold) 50%, var(--accent-bronze) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .auth-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .auth-input-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .auth-input-group label {
-      font-size: 12px;
-      color: var(--accent-gold);
-    }
-
-    .forgot-link-btn {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 11.5px;
-      font-family: var(--font-body);
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .forgot-link-btn:hover {
-      color: var(--accent-gold);
-      text-decoration: underline;
-    }
-
-    .auth-input {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 12px 14px;
-      color: #FFF;
-      font-family: var(--font-body);
-      outline: none;
-      font-size: 14px;
-    }
-
-    .auth-input:focus {
-      border-color: var(--accent-gold);
-    }
-
-    .gold-btn {
-      background: linear-gradient(135deg, #FFE3A3 0%, var(--accent-gold) 60%, var(--accent-bronze) 100%);
-      border: none;
-      color: #0A0B0E;
-      font-weight: 700;
-      font-family: var(--font-body);
-      padding: 13px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: opacity 0.2s;
-    }
-
-    .gold-btn:active {
-      opacity: 0.85;
-    }
-
-    /* زر Google المحدث */
-    .google-btn {
-      background: #FFFFFF;
-      color: #1F1F1F;
-      border: none;
-      font-weight: 600;
-      font-family: var(--font-body);
-      padding: 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 13.5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: background 0.2s;
-    }
-
-    .google-btn:hover {
-      background: #EBEBEB;
-    }
-
-    .auth-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-secondary);
-      font-size: 12px;
-      margin: 2px 0;
-    }
-
-    .auth-divider::before, .auth-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--border-subtle);
-    }
-
-    /* زر التبديل الفعلي لإنشاء حساب بدلاً من مجرد نص */
-    .switch-mode-btn {
-      background: var(--surface-elevated);
-      border: 1px solid var(--accent-gold);
-      color: var(--accent-gold);
-      border-radius: 12px;
-      padding: 11px;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: var(--font-body);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-      margin-top: 4px;
-    }
-
-    .switch-mode-btn:active {
-      background: var(--surface-card);
-      transform: scale(0.98);
-    }
-
-    /* حقل الـ OTP */
-    .otp-code-input {
-      letter-spacing: 10px;
-      text-align: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent-gold);
-    }
-
-    /* الهيدر العلوي */
-    .top-header {
-      height: 60px;
-      padding: 0 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-      background: rgba(10, 11, 14, 0.85);
-      backdrop-filter: blur(12px);
-      z-index: 50;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-    }
-
-    .brand-logo {
-      font-family: var(--font-brand);
-      font-size: 24px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #FFF1CE 0%, var(--accent-gold) 50%, var(--accent-bronze) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-btn {
-      background: none;
-      border: none;
-      color: var(--accent-gold);
-      font-size: 18px;
-      cursor: pointer;
-    }
-
-    /* شاشات المحتوى */
-    .main-viewport {
-      flex: 1;
-      margin-top: 60px;
-      margin-bottom: 65px;
-      overflow-y: auto;
-    }
-
-    .main-viewport::-webkit-scrollbar {
-      display: none;
-    }
-
-    .screen {
-      display: none;
-      min-height: 100%;
-      flex-direction: column;
-    }
-
-    .screen.active {
-      display: flex;
-    }
-
-    /* الستوريز */
-    .stories-container {
-      display: flex;
-      gap: 14px;
-      padding: 14px 16px;
-      overflow-x: auto;
-      border-bottom: 1px solid var(--border-subtle);
-      background: var(--surface-card);
-    }
-
-    .stories-container::-webkit-scrollbar {
-      display: none;
-    }
-
-    .story-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .story-ring {
-      width: 62px;
-      height: 62px;
-      border-radius: 50%;
-      padding: 2.5px;
-      background: linear-gradient(45deg, var(--accent-bronze), var(--accent-gold), #FFE4A0);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .story-ring.add-story {
-      background: var(--surface-elevated);
-      border: 1px dashed var(--accent-gold);
-    }
-
-    .story-avatar {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--bg-primary);
-    }
-
-    .story-username {
-      font-size: 11px;
-      color: var(--text-secondary);
-      max-width: 66px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* المنشورات */
-    .post-card {
-      background: var(--surface-card);
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 8px;
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-    }
-
-    .post-user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .post-user-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid var(--accent-gold);
-    }
-
-    .follow-btn {
-      background: transparent;
-      border: 1px solid var(--accent-gold);
-      color: var(--accent-gold);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11.5px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .post-media-box {
-      width: 100%;
-      background: #000;
-    }
-
-    .post-media {
-      width: 100%;
-      max-height: 480px;
-      object-fit: contain;
-      display: block;
-    }
-
-    .post-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px 6px 16px;
-    }
-
-    .action-btn {
-      background: none;
-      border: none;
-      color: var(--text-primary);
-      cursor: pointer;
-      font-size: 19px;
-    }
-
-    .action-btn.liked {
-      color: #E24B4B;
-    }
-
-    .post-caption {
-      padding: 0 16px 14px 16px;
-      font-size: 13.5px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* مشغل الريلز */
-    #screen-reels {
-      height: 100%;
-      background: #000;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-    }
-
-    .reel-container {
-      height: 100%;
-      width: 100%;
-      scroll-snap-align: start;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-    }
-
-    .reel-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .reel-overlay {
-      position: absolute;
-      bottom: 20px;
-      right: 16px;
-      left: 70px;
-      z-index: 10;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
-    }
-
-    /* الشات الفوري */
-    #screen-chat {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chat-messages {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .message-bubble {
-      max-width: 80%;
-      padding: 10px 14px;
-      border-radius: 16px;
-      font-size: 13.5px;
-      word-break: break-word;
-    }
-
-    .message-bubble.sent {
-      align-self: flex-start;
-      background: linear-gradient(135deg, var(--accent-bronze), var(--accent-gold));
-      color: #0A0B0E;
-      font-weight: 500;
-      border-bottom-left-radius: 2px;
-    }
-
-    .message-bubble.received {
-      align-self: flex-end;
-      background: var(--surface-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      border-bottom-right-radius: 2px;
-    }
-
-    .chat-input-bar {
-      padding: 10px 14px;
-      background: var(--surface-card);
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .chat-input-bar input {
-      flex: 1;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      padding: 9px 16px;
-      color: #FFF;
-      outline: none;
-    }
-
-    /* البروفايل */
-    .profile-hero {
-      padding: 24px 18px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .profile-large-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--accent-gold);
-      padding: 3px;
-    }
-
-    .stats-row {
-      display: flex;
-      width: 100%;
-      justify-content: space-around;
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 1px solid var(--border-subtle);
-    }
-
-    /* شريط التنقل */
-    .bottom-navbar {
-      height: 65px;
-      background: rgba(14, 16, 21, 0.95);
-      border-top: 1px solid var(--border-subtle);
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 50;
-      backdrop-filter: blur(12px);
-    }
-
-    .nav-tab {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 19px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      cursor: pointer;
-    }
-
-    .nav-tab.active {
-      color: var(--accent-gold);
-    }
-
-    .nav-tab span {
-      font-size: 10px;
-    }
-
-    .add-action-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #FFE3A3 0%, var(--accent-gold) 60%, var(--accent-bronze) 100%);
-      border: none;
-      color: #0A0B0E;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      margin-top: -15px;
-    }
-
-    /* المودالز */
-    .modal-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 150;
-      display: none;
-      align-items: flex-end;
-      backdrop-filter: blur(4px);
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .bottom-sheet {
-      width: 100%;
-      background: var(--surface-card);
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-      padding: 22px 18px;
-      border-top: 1px solid var(--accent-gold);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .hidden-file-input {
-      display: none;
-    }
+    body { font-family: 'Cairo', sans-serif; background-color: #06080e; color: #f1f5f9; overflow-x: hidden; }
+    .gradient-brand-text {
+      background: linear-gradient(135deg, #c084fc 0%, #38bdf8 50%, #facc15 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .glass-nav { background: rgba(10,13,23,.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .glow-logo-filter { filter: drop-shadow(0 0 16px rgba(168,85,247,.55)); }
+    .bg-orbs::before, .bg-orbs::after { content:""; position:absolute; border-radius:9999px; filter: blur(90px); z-index:0; pointer-events:none; }
+    .bg-orbs::before { width:340px; height:340px; background:rgba(147,51,234,.25); top:-60px; right:-80px; }
+    .bg-orbs::after  { width:300px; height:300px; background:rgba(56,189,248,.18); top:120px; left:-80px; }
+    .no-scrollbar::-webkit-scrollbar { display:none; } .no-scrollbar { scrollbar-width:none; }
+    .icon-tile { position:relative; display:flex; align-items:center; justify-content:center; color:#fff; border-radius:1rem; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 20px -6px rgba(0,0,0,.6); }
+    .icon-tile::after { content:""; position:absolute; inset:0; border-radius:inherit; background: linear-gradient(160deg, rgba(255,255,255,.22), transparent 55%); pointer-events:none; }
+    .card-in { animation: cardIn .45s ease both; }
+    @keyframes cardIn { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
+    details > summary { list-style:none; cursor:pointer; } details > summary::-webkit-details-marker { display:none; }
+    details[open] .faq-chevron { transform: rotate(180deg); }
+    .faq-chevron { transition: transform .25s; }
+    @media (prefers-reduced-motion: reduce) { .card-in { animation:none; } html { scroll-behavior:auto; } }
   </style>
 </head>
-<body>
+<body class="selection:bg-purple-600 selection:text-white">
 
-  <div id="app-container">
-
-    
-    <div id="auth-screen">
-      <div class="auth-card">
-        <div class="auth-brand">LINKUP</div>
-        <p style="text-align: center; font-size: 13px; color: var(--text-secondary);" id="auth-subtitle">سجل دخول ونورنايا ملك</p>
-        
-        
-        <div id="auth-fields-container" style="display: flex; flex-direction: column; gap: 12px;">
-          
-          <div class="auth-input-group" id="group-username" style="display: none;">
-            <label>اسم المستخدم (Unique Handle)</label>
-            <input type="text" id="auth-username" class="auth-input" placeholder="ziyad_mira">
-          </div>
-
-          <div class="auth-input-group">
-            <label>البريد الإلكتروني (Gmail)</label>
-            <input type="email" id="auth-email" class="auth-input" placeholder="name@gmail.com">
-          </div>
-
-          <div class="auth-input-group" id="group-password">
-            <div class="auth-input-header">
-              <label>كلمة المرور</label>
-              
-              <button type="button" class="forgot-link-btn" id="forgot-btn" onclick="openForgotPassword()">هل نسيت كلمة المرور؟</button>
-            </div>
-            <input type="password" id="auth-password" class="auth-input" placeholder="••••••••">
-          </div>
-
-          <button class="gold-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">تسجيل الدخول</button>
-
-          <div class="auth-divider">أو</div>
-
-          
-          <button type="button" class="google-btn" id="google-auth-btn" onclick="signInWithGoogle()">
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.36 7.31 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2.0 10.05.0 12s.46 3.8.127 5.42l4.01-3.15z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.64 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-            </svg>
-            المتابعة باستخدام Google
-          </button>
-
-          
-          <button type="button" class="switch-mode-btn" id="switch-mode-btn" onclick="toggleAuthMode()">
-            <i class="fa-solid fa-user-plus"></i>
-            <span id="switch-btn-text">ليس لديك حساب؟ أنشئ حساباً الآن</span>
-          </button>
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-40 glass-nav border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3.5 group">
+        <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#1b1236] via-[#0f172a] to-[#1e1b4b] p-1.5 border border-purple-500/40 shadow-lg shadow-purple-600/30 transition-transform group-hover:scale-105 flex items-center justify-center">
+          <svg viewBox="0 0 100 100" class="w-full h-full glow-logo-filter" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c084fc"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+              <linearGradient id="crownGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fde047"/><stop offset="100%" stop-color="#f59e0b"/>
+              </linearGradient>
+            </defs>
+            <rect x="10" y="42" width="3.5" height="16" rx="1.75" fill="#c084fc" opacity="0.8"/>
+            <rect x="16" y="34" width="3.5" height="32" rx="1.75" fill="#a855f7"/>
+            <rect x="22" y="40" width="3.5" height="20" rx="1.75" fill="#38bdf8"/>
+            <path d="M 32 75 V 28 C 32 28 35 25 48 25 C 65 25 72 36 72 48 C 72 60 63 67 48 67 H 42 L 32 75 Z" stroke="url(#pGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="46,39 61,48 46,57" fill="#ffffff"/>
+            <path d="M 66 22 L 72 13 L 78 20 L 84 12 L 87 23 Z" fill="url(#crownGrad)"/>
+            <circle cx="72" cy="11.5" r="1.5" fill="#fff"/><circle cx="84" cy="10.5" r="1.5" fill="#fff"/>
+          </svg>
         </div>
-
-        
-        <div id="otp-container" style="display: none; flex-direction: column; gap: 14px;">
-          <p style="font-size: 13px; text-align: center; color: var(--accent-gold);" id="otp-hint-text">
-            تم إرسال رمز تحقق حقيقي إلى بريدك الإلكتروني. يرجى إدخال الرمز المكون من 6 أرقام:
-          </p>
-          <input type="text" id="otp-code-input" class="auth-input otp-code-input" maxlength="6" placeholder="000000">
-          <button class="gold-btn" id="verify-otp-action-btn" onclick="verifyEmailOtp()">تأكيد الرمز والدخول</button>
-          <button type="button" style="background: transparent; border: none; text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 13px;" onclick="cancelOtp()">الرجوع</button>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-black tracking-tight text-white">Premiumak</span>
+            <span class="text-amber-400 text-[10px] font-black bg-amber-400/15 px-1.5 py-0.5 rounded border border-amber-400/30">VIP</span>
+          </div>
+          <p class="text-xs text-purple-300 font-bold hidden sm:block">بريميومك • متجر الاشتراكات الرقمية</p>
         </div>
+      </a>
 
-        
-        <div id="forgot-password-container" style="display: none; flex-direction: column; gap: 14px;">
-          <p style="font-size: 13px; text-align: center; color: var(--accent-gold);">
-            أدخل بريدك الإلكتروني وسنرسل لك رمزاً لإعادة تعيين كلمة المرور فوراً:
-          </p>
-          <input type="email" id="forgot-email-input" class="auth-input" placeholder="name@gmail.com">
-          <button class="gold-btn" onclick="sendPasswordResetOtp()">إرسال رمز الاستعادة</button>
-          <button type="button" style="background: transparent; border: none; text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 13px;" onclick="cancelForgotPassword()">الرجوع لتسجيل الدخول</button>
-        </div>
-
+      <div class="flex items-center gap-3">
+        <button onclick="toggleCartDrawer()" aria-label="عرض السلة" class="relative p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 transition-all hover:scale-105">
+          <i class="fa-solid fa-bag-shopping text-lg"></i>
+          <span id="cartCountBadge" class="absolute -top-1.5 -left-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-black rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center shadow-lg hidden">0</span>
+        </button>
+        <a href="https://t.me/Ziyad_Mira" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-[#229ed9] hover:bg-[#1f93cb] text-white transition-all hover:scale-105 shadow-md shadow-cyan-500/20">
+          <i class="fa-brands fa-telegram text-lg"></i>
+          <span class="hidden sm:inline">تيليجرام (@Ziyad_Mira)</span>
+        </a>
       </div>
     </div>
+  </header>
 
-    
-    <header class="top-header">
-      <div class="brand-logo">LINKUP</div>
-      <div>
-        <button class="header-btn" onclick="logout()" title="تسجيل الخروج"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+  <!-- Hero -->
+  <section class="relative pt-32 pb-12 overflow-hidden bg-orbs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-900/30 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-bold mb-6">
+        <i class="fa-solid fa-bolt text-amber-400"></i>
+        <span>تسليم سريع • دعم مباشر • ضمان طوال فترة الاشتراك</span>
       </div>
-    </header>
 
-    
-    <main class="main-viewport">
-      
-      
-      <section id="screen-home" class="screen active">
-        <div class="stories-container" id="stories-tray">
-          <div class="story-item" onclick="triggerStoryUpload()">
-            <div class="story-ring add-story">
-              <i class="fa-solid fa-plus" style="color: var(--accent-gold);"></i>
-            </div>
-            <span class="story-username">قصتك</span>
-          </div>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight mb-4">
+        اشتراكاتك الرقمية <br>
+        <span class="gradient-brand-text">بأفضل الأسعار وتفعيل سريع</span> 💎
+      </h1>
+
+      <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-8">
+        اطلب اشتراكك من <span class="text-white font-bold">Premiumak</span> بأسهل طريقة وتواصل مباشر عبر تيليجرام مع دعم فوري.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
+        <a href="#subscriptions" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm flex items-center gap-2 transition-transform hover:scale-105 shadow-lg shadow-purple-600/30">
+          <i class="fa-solid fa-store"></i><span>تصفح الاشتراكات</span>
+        </a>
+        <a href="https://t.me/Ziyad_Mira" target="_blank" rel="noopener" class="px-6 py-3 rounded-xl bg-[#229ed9] hover:bg-[#1e8cc1] text-white font-bold text-sm flex items-center gap-2 transition-transform hover:scale-105">
+          <i class="fa-brands fa-telegram text-lg"></i><span>تواصل عبر تيليجرام</span>
+        </a>
+        <a id="heroMessenger" href="#" target="_blank" rel="noopener" class="hidden px-6 py-3 rounded-xl bg-[#0084ff] hover:bg-[#0074e0] text-white font-bold text-sm items-center gap-2 transition-transform hover:scale-105">
+          <i class="fa-brands fa-facebook-messenger text-lg"></i><span>تواصل عبر ماسنجر</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 max-w-xl mx-auto">
+        <div class="rounded-2xl bg-white/5 border border-white/10 py-3"><div class="text-xl sm:text-2xl font-black text-amber-400" id="statProducts">14</div><div class="text-[11px] sm:text-xs text-slate-400">باقة متاحة</div></div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 py-3"><div class="text-xl sm:text-2xl font-black text-sky-400">8</div><div class="text-[11px] sm:text-xs text-slate-400">خدمات مختلفة</div></div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 py-3"><div class="text-xl sm:text-2xl font-black text-emerald-400">24/7</div><div class="text-[11px] sm:text-xs text-slate-400">استقبال الطلبات</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subscriptions -->
+  <section id="subscriptions" class="py-8 relative scroll-mt-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Search + Sort -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-5">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute top-1/2 -translate-y-1/2 right-4 text-slate-500"></i>
+          <input id="searchInput" type="search" placeholder="ابحث عن اشتراك... (مثلاً: يوتيوب)" class="w-full bg-slate-900/70 border border-slate-700 focus:border-purple-500 focus:outline-none rounded-xl py-3 pr-11 pl-4 text-sm text-white placeholder-slate-500 transition-colors" />
         </div>
-        <div id="posts-feed-container"></div>
-      </section>
+        <select id="sortSelect" class="bg-slate-900/70 border border-slate-700 focus:border-purple-500 focus:outline-none rounded-xl py-3 px-4 text-sm text-slate-200">
+          <option value="default">الترتيب: الافتراضي</option>
+          <option value="asc">السعر: من الأقل للأعلى</option>
+          <option value="desc">السعر: من الأعلى للأقل</option>
+        </select>
+      </div>
 
-      
-      <section id="screen-reels" class="screen">
-        <div id="reels-feed-container" style="height: 100%;"></div>
-      </section>
+      <!-- Tabs -->
+      <div id="catTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-4 mb-8 border-b border-slate-800"></div>
 
-      
-      <section id="screen-chat" class="screen">
-        <div class="chat-messages" id="chat-messages-container"></div>
-        <div class="chat-input-bar">
-          <input type="text" id="chat-input-text" placeholder="اكتب رسالة فورية مشفرة..." onkeypress="if(event.key === 'Enter') sendRealtimeMessage()">
-          <button class="header-btn" onclick="sendRealtimeMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <div id="emptyState" class="hidden text-center py-16 text-slate-500">
+        <i class="fa-regular fa-face-frown text-4xl mb-3"></i>
+        <p class="font-bold">مفيش نتائج مطابقة لبحثك</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How to order -->
+  <section class="py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl sm:text-3xl font-black text-center mb-2">إزاي تطلب؟ <span class="gradient-brand-text">في 3 خطوات</span></h2>
+      <p class="text-center text-slate-400 text-sm mb-8">من غير تسجيل ولا تعقيد</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="p-5 rounded-3xl bg-[#0d1222] border border-slate-800 text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-purple-600/20 text-purple-300 flex items-center justify-center text-xl"><i class="fa-solid fa-hand-pointer"></i></div>
+          <h4 class="font-black mb-1">1. اختار اشتراكك</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">اختار الباقة المناسبة واضغط "طلب فوري" أو أضفها للسلة.</p>
         </div>
-      </section>
-
-      
-      <section id="screen-profile" class="screen">
-        <div class="profile-hero">
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="profile-large-avatar" id="prof-avatar" alt="Avatar">
-          <h3 id="prof-name" style="margin-top: 10px;">جاري التحميل...</h3>
-          <p id="prof-handle" style="color: var(--accent-gold); font-size: 13px;">@handle</p>
-          <div class="stats-row">
-            <div><b id="stat-posts">0</b><p style="font-size: 11px; color: var(--text-secondary);">منشورات</p></div>
-            <div><b id="stat-followers">0</b><p style="font-size: 11px; color: var(--text-secondary);">متابعين</p></div>
-            <div><b id="stat-following">0</b><p style="font-size: 11px; color: var(--text-secondary);">أتابعهم</p></div>
-          </div>
+        <div class="p-5 rounded-3xl bg-[#0d1222] border border-slate-800 text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-sky-600/20 text-sky-300 flex items-center justify-center text-xl"><i class="fa-brands fa-telegram"></i></div>
+          <h4 class="font-black mb-1">2. ابعت الطلب</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">تفاصيل طلبك بتتجهز تلقائياً وبتتبعت على تيليجرام بضغطة واحدة.</p>
         </div>
-      </section>
+        <div class="p-5 rounded-3xl bg-[#0d1222] border border-slate-800 text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-emerald-600/20 text-emerald-300 flex items-center justify-center text-xl"><i class="fa-solid fa-circle-check"></i></div>
+          <h4 class="font-black mb-1">3. ادفع واستلم</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">ادفع بفودافون كاش أو إنستاباي وهتستلم التفعيل بعد التأكيد.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    </main>
+  <!-- Trust -->
+  <section class="py-12 bg-slate-900/40 border-y border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+        <div class="p-4 bg-slate-800/30 rounded-2xl border border-slate-700/50">
+          <i class="fa-solid fa-wallet text-2xl text-amber-400 mb-2"></i>
+          <h4 class="font-bold text-white mb-1">طرق الدفع المتوفرة</h4>
+          <p class="text-xs text-slate-400">فودافون كاش • إنستاباي (InstaPay) • المحافظ الإلكترونية</p>
+        </div>
+        <div class="p-4 bg-slate-800/30 rounded-2xl border border-slate-700/50">
+          <i class="fa-solid fa-shield-halved text-2xl text-purple-400 mb-2"></i>
+          <h4 class="font-bold text-white mb-1">ضمان واستبدال</h4>
+          <p class="text-xs text-slate-400">ضمان طوال فترة الاشتراك مع دعم فني سريع</p>
+        </div>
+        <div class="p-4 bg-slate-800/30 rounded-2xl border border-slate-700/50">
+          <i class="fa-solid fa-headset text-2xl text-sky-400 mb-2"></i>
+          <h4 class="font-bold text-white mb-1">تواصل مباشر</h4>
+          <p class="text-xs text-slate-400">رد على تيليجرام @Ziyad_Mira</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    
-    <nav class="bottom-navbar">
-      <button class="nav-tab active" onclick="switchTab('screen-home', this)"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
-      <button class="nav-tab" onclick="switchTab('screen-reels', this)"><i class="fa-solid fa-play"></i><span>الريلز</span></button>
-      <button class="add-action-btn" onclick="openCreateSheet()"><i class="fa-solid fa-plus"></i></button>
-      <button class="nav-tab" onclick="switchTab('screen-chat', this)"><i class="fa-regular fa-comment-dots"></i><span>المحادثات</span></button>
-      <button class="nav-tab" onclick="switchTab('screen-profile', this)"><i class="fa-regular fa-user"></i><span>حسابي</span></button>
-    </nav>
+  <!-- FAQ -->
+  <section class="py-14">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl sm:text-3xl font-black text-center mb-8">أسئلة <span class="gradient-brand-text">شائعة</span></h2>
+      <div class="space-y-3">
+        <details class="group bg-[#0d1222] border border-slate-800 rounded-2xl p-4">
+          <summary class="flex items-center justify-between font-bold text-sm"><span>إزاي بستلم الاشتراك؟</span><i class="fa-solid fa-chevron-down faq-chevron text-slate-500 text-xs"></i></summary>
+          <p class="text-xs text-slate-400 leading-relaxed mt-3">بعد تأكيد الدفع على تيليجرام بيتم تفعيل الاشتراك أو تسليم بياناته حسب نوع الخدمة.</p>
+        </details>
+        <details class="group bg-[#0d1222] border border-slate-800 rounded-2xl p-4">
+          <summary class="flex items-center justify-between font-bold text-sm"><span>إيه طرق الدفع؟</span><i class="fa-solid fa-chevron-down faq-chevron text-slate-500 text-xs"></i></summary>
+          <p class="text-xs text-slate-400 leading-relaxed mt-3">فودافون كاش وإنستاباي والمحافظ الإلكترونية. تفاصيل الدفع بتتبعت لك في المحادثة.</p>
+        </details>
+        <details class="group bg-[#0d1222] border border-slate-800 rounded-2xl p-4">
+          <summary class="flex items-center justify-between font-bold text-sm"><span>لو حصلت مشكلة في الاشتراك؟</span><i class="fa-solid fa-chevron-down faq-chevron text-slate-500 text-xs"></i></summary>
+          <p class="text-xs text-slate-400 leading-relaxed mt-3">كلمنا على تيليجرام وهنحلها أو نستبدل الاشتراك طوال مدة الضمان.</p>
+        </details>
+        <details class="group bg-[#0d1222] border border-slate-800 rounded-2xl p-4">
+          <summary class="flex items-center justify-between font-bold text-sm"><span>إيه معنى "يوزر" و"على الجيميل الشخصي"؟</span><i class="fa-solid fa-chevron-down faq-chevron text-slate-500 text-xs"></i></summary>
+          <p class="text-xs text-slate-400 leading-relaxed mt-3">"يوزر" يعني ملف خاص بيتسلم لك، و"الجيميل الشخصي" يعني التفعيل بيتم على إيميلك أنت. هنوضح لك التفاصيل وقت الطلب.</p>
+        </details>
+        <details class="group bg-[#0d1222] border border-slate-800 rounded-2xl p-4">
+          <summary class="flex items-center justify-between font-bold text-sm"><span>ممكن أجدد على نفس اليوزر أو الأكونت؟</span><i class="fa-solid fa-chevron-down faq-chevron text-slate-500 text-xs"></i></summary>
+          <p class="text-xs text-slate-400 leading-relaxed mt-3">أيوه، تقدر تجدد على نفس اليوزر أو الأكونت بتاعك. كلمنا على تيليجرام قبل ما اشتراكك ينتهي وقولنا الخدمة اللي عايز تجددها، وهنجددها لك على نفس الحساب من غير ما تبدأ من الأول.</p>
+        </details>
+      </div>
+    </div>
+  </section>
 
-    
-    <div class="modal-overlay" id="create-modal" onclick="closeModals()">
-      <div class="bottom-sheet" onclick="event.stopPropagation()">
-        <h4 style="color: var(--accent-gold); text-align: center; margin-bottom: 8px;">محتوى حقيقي جديد</h4>
-        <button class="gold-btn" style="background: var(--surface-elevated); color: #FFF; border: 1px solid var(--border-subtle);" onclick="triggerUpload('image', false)">
-          <i class="fa-regular fa-image" style="color: var(--accent-gold); margin-left: 8px;"></i> نشر صورة
+  <!-- Footer -->
+  <footer class="py-8 text-center text-xs text-slate-500 border-t border-white/5 px-4">
+    <p>© 2026 Premiumak | بريميومك. جميع الحقوق محفوظة.</p>
+    <p class="mt-2 text-[11px] text-slate-600 max-w-2xl mx-auto">أسماء الخدمات المذكورة هي علامات تجارية تخص أصحابها، والمتجر مستقل وغير تابع لها، وتُستخدم الأسماء للتعريف بالخدمة فقط.</p>
+  </footer>
+
+  <!-- Floating Telegram -->
+  <a href="https://t.me/Ziyad_Mira" target="_blank" rel="noopener" aria-label="تيليجرام" class="fixed bottom-5 right-5 z-30 w-14 h-14 rounded-full bg-[#229ed9] hover:bg-[#1f93cb] text-white flex items-center justify-center shadow-xl shadow-cyan-500/30 transition-transform hover:scale-110">
+    <i class="fa-brands fa-telegram text-2xl"></i>
+  </a>
+
+  <!-- Cart Drawer -->
+  <div id="cartOverlay" onclick="toggleCartDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden"></div>
+  <aside id="cartDrawer" class="fixed top-0 left-0 bottom-0 w-full max-w-sm bg-[#0c0f1c] border-r border-slate-800 z-50 p-6 flex flex-col -translate-x-full transition-transform duration-300">
+    <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-bag-shopping text-purple-400"></i>
+        <h3 class="font-black text-lg text-white">سلة المشتريات</h3>
+      </div>
+      <button onclick="toggleCartDrawer()" aria-label="إغلاق" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+
+    <div id="cartItemsList" class="flex-1 overflow-y-auto py-4 space-y-3"></div>
+
+    <div class="pt-4 border-t border-slate-800 space-y-3">
+      <div class="flex justify-between items-center text-base font-black">
+        <span class="text-slate-300">الإجمالي:</span>
+        <span id="cartTotalPrice" class="text-amber-400 text-xl font-black">0 ج.م</span>
+      </div>
+      <button onclick="checkoutCart('telegram')" class="w-full py-3 rounded-xl bg-[#229ed9] hover:bg-[#1e8cc1] text-white font-bold text-sm flex items-center justify-center gap-2">
+        <i class="fa-brands fa-telegram text-lg"></i><span>إتمام الطلب عبر تيليجرام</span>
+      </button>
+      <button id="cartMessengerBtn" onclick="checkoutCart('messenger')" class="hidden w-full py-3 rounded-xl bg-[#0084ff] hover:bg-[#0074e0] text-white font-bold text-sm items-center justify-center gap-2">
+        <i class="fa-brands fa-facebook-messenger text-lg"></i><span>إتمام الطلب عبر ماسنجر</span>
+      </button>
+      <button onclick="clearCart()" class="w-full text-xs text-slate-500 hover:text-red-400 py-1">إفراغ السلة</button>
+    </div>
+  </aside>
+
+  <!-- Quick Order Modal -->
+  <div id="orderModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)closeOrderModal()">
+    <div class="bg-[#0f1424] border border-slate-700 max-w-md w-full rounded-3xl p-6 relative">
+      <button onclick="closeOrderModal()" aria-label="إغلاق" class="absolute top-4 left-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+      <div class="text-center mb-5">
+        <div id="modalLogoContainer" class="w-16 h-16 mx-auto mb-3"></div>
+        <h3 id="modalTitle" class="text-xl font-black text-white"></h3>
+        <p id="modalPeriod" class="text-xs text-purple-300 font-bold mt-1"></p>
+        <p id="modalPrice" class="text-2xl font-black text-amber-400 mt-2"></p>
+      </div>
+      <div class="space-y-3">
+        <button id="modalBtnTelegram" class="w-full py-3 rounded-xl bg-[#229ed9] hover:bg-[#1e8cc1] text-white font-bold text-sm flex items-center justify-center gap-2">
+          <i class="fa-brands fa-telegram text-lg"></i><span>إرسال الطلب لتيليجرام (@Ziyad_Mira)</span>
         </button>
-        <button class="gold-btn" style="background: var(--surface-elevated); color: #FFF; border: 1px solid var(--border-subtle);" onclick="triggerUpload('video', true)">
-          <i class="fa-solid fa-video" style="color: var(--accent-gold); margin-left: 8px;"></i> رفع فيديو للريلز
+        <button id="modalBtnMessenger" class="hidden w-full py-3 rounded-xl bg-[#0084ff] hover:bg-[#0074e0] text-white font-bold text-sm items-center justify-center gap-2">
+          <i class="fa-brands fa-facebook-messenger text-lg"></i><span>إرسال الطلب عبر ماسنجر</span>
         </button>
       </div>
     </div>
+  </div>
 
-    
-    <input type="file" id="media-file-input" class="hidden-file-input" onchange="handleFileSelected(event)">
-    <input type="file" id="story-file-input" class="hidden-file-input" accept="image/*,video/*" onchange="handleStorySelected(event)">
-
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-purple-500 text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[60] flex items-center gap-2">
+    <i class="fa-solid fa-check-circle text-emerald-400"></i>
+    <span id="toastMsg"></span>
   </div>
 
   <script>
-    
-    const SUPABASE_URL = "https://dnanckdyglezgjaxksey.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_7hUZqoIEYPf2EPtmtMjzVw_RboLexpp";
+    const TELEGRAM_USERNAME = "Ziyad_Mira";
+    // حط اسم صفحة الفيسبوك هنا (من رابط m.me/اسم_الصفحة) عشان زرار ماسنجر يظهر
+    const MESSENGER_USERNAME = "";
+    const MESSENGER_URL = MESSENGER_USERNAME ? `https://m.me/${MESSENGER_USERNAME}` : "";
+    const CART_KEY = "premiumak_cart_v2";
 
-    let supabase = null;
-    try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch(e) {
-      console.warn("Supabase not yet configured:", e);
+    // أيقونات أصلية: كل خدمة ليها بلاطة بلون وأيقونة عامة
+    const categories = [
+      { key: "all",         label: "🔥 جميع الاشتراكات" },
+      { key: "video_edit",  label: "✂️ مونتاج" },
+      { key: "vpn",         label: "🛡️ في بي ان (VPN)" },
+      { key: "ai",          label: "🤖 ذكاء اصطناعي" },
+      { key: "stream",      label: "🎬 مسلسلات وأفلام" },
+      { key: "music_video", label: "🎵 فيديو وموسيقى" },
+      { key: "design",      label: "🎨 تصميم" }
+    ];
+
+    const tiles = {
+      capcut:     { icon: "fa-scissors",             grad: "from-fuchsia-500 to-purple-700" },
+      expressvpn: { icon: "fa-shield-halved",        grad: "from-rose-500 to-red-700" },
+      gemini:     { icon: "fa-wand-magic-sparkles",  grad: "from-sky-400 to-indigo-600" },
+      noorplay:   { icon: "fa-tv",                   grad: "from-amber-400 to-orange-600" },
+      viu:        { icon: "fa-clapperboard",         grad: "from-yellow-300 to-amber-500" },
+      youtube:    { icon: "fa-circle-play",          grad: "from-red-500 to-rose-700" },
+      spotify:    { icon: "fa-headphones",           grad: "from-emerald-400 to-green-700" },
+      canva:      { icon: "fa-palette",              grad: "from-cyan-400 to-violet-600" },
+      watchit:    { icon: "fa-film",                 grad: "from-amber-500 to-yellow-800" }
+    };
+
+    // لو عندك ملف لوجو للخدمة (من المصدر الرسمي) حط مساره هنا، مثال: capcut: "img/capcut.png"
+    // وسيبه فاضي عشان تفضل الأيقونة الافتراضية.
+    // حط ملفات الشعارات في فولدر اسمه img جنب index.html بنفس الأسماء دي.
+    // لو أي ملف مش موجود، بتظهر الأيقونة الافتراضية تلقائياً.
+    // bg = لون خلفية البلاطة بما يناسب الصورة، fit = cover للصور المربعة و contain للعريضة.
+    const logoImages = {
+      capcut:     { src: "img/capcut.jpg",     bg: "#ffffff", fit: "contain", pad: "p-1.5" },
+      expressvpn: { src: "img/expressvpn.png", bg: "#d9393b", fit: "cover",   pad: "" },
+      gemini:     { src: "img/gemini.jpg",     bg: "#ffffff", fit: "contain", pad: "p-1.5" },
+      noorplay:   { src: "img/noorplay.png",   bg: "#141414", fit: "contain", pad: "p-0.5" },
+      viu:        { src: "img/viu.png",        bg: "#ffbf00", fit: "cover",   pad: "" },
+      spotify:    { src: "img/spotify.jpg",    bg: "#000000", fit: "contain", pad: "p-0.5" },
+      canva:      { src: "img/canva.jpg",      bg: "#4f46e5", fit: "cover",   pad: "" },
+      watchit:    { src: "img/watchit.png",    bg: "#0e0905", fit: "cover",   pad: "" }
+    };
+
+    function iconTile(key, sizeClass, iconSize) {
+      const t = tiles[key] || tiles.capcut;
+      return `<div class="icon-tile bg-gradient-to-br ${t.grad} ${sizeClass}"><i class="fa-solid ${t.icon} ${iconSize} relative z-10"></i></div>`;
     }
 
-    let currentUser = null;
-    let isRegisterMode = false;
-    let pendingVerificationEmail = "";
-    let isRecoveryFlow = false;
-    let pendingUploadConfig = { type: 'image', isReel: false };
-    let globalChatChannel = null;
-
-    /* =========================================================================
-       2. منطق المصادقة والتبديل (AUTH & MODE TOGGLE)
-       ========================================================================= */
-    function toggleAuthMode() {
-      isRegisterMode = !isRegisterMode;
-      const usernameGroup = document.getElementById('group-username');
-      const forgotBtn = document.getElementById('forgot-btn');
-      const submitBtn = document.getElementById('auth-submit-btn');
-      const subtitle = document.getElementById('auth-subtitle');
-      const switchBtnText = document.getElementById('switch-btn-text');
-
-      if (isRegisterMode) {
-        usernameGroup.style.display = 'flex';
-        forgotBtn.style.display = 'none';
-        submitBtn.innerText = 'إرسال رمز التأكيد للجيميل';
-        subtitle.innerText = 'انضم لمجتمع LinkUp واستلم كود التفعيل الملكي';
-        switchBtnText.innerText = 'لديك حساب بالفعل؟ سجّل دخولك الآن';
-      } else {
-        usernameGroup.style.display = 'none';
-        forgotBtn.style.display = 'block';
-        submitBtn.innerText = 'تسجيل الدخول';
-        subtitle.innerText = 'سجّل دخولك لمجتمع الفخامة والخصوصية';
-        switchBtnText.innerText = 'ليس لديك حساب؟ أنشئ حساباً الآن';
-      }
+    function imgFallback(img) {
+      const d = img.dataset;
+      img.parentNode.outerHTML = iconTile(d.key, d.size, d.icon);
     }
 
-    async function handleAuthSubmit() {
-      if (!supabase) return alert("يرجى وضع روابط Supabase الصحيحة في السكريبت أولاً.");
-      
-      const email = document.getElementById('auth-email').value.trim();
-      const password = document.getElementById('auth-password').value.trim();
-      const username = document.getElementById('auth-username').value.trim();
-
-      if (!email) return alert("يرجى كتابة البريد الإلكتروني");
-
-      if (isRegisterMode) {
-        if (!username) return alert("يرجى كتابة اسم المستخدم (Handle)");
-        if (!password || password.length < 6) return alert("كلمة المرور يجب ألا تقل عن 6 أحرف");
-
-        const { data, error } = await supabase.auth.signUp({
-          email: email,
-          password: password,
-          options: { data: { username: username, full_name: username } }
-        });
-
-        if (error) return alert("خطأ في إنشاء الحساب: " + error.message);
-
-        pendingVerificationEmail = email;
-        isRecoveryFlow = false;
-        document.getElementById('auth-fields-container').style.display = 'none';
-        document.getElementById('otp-container').style.display = 'flex';
-        document.getElementById('otp-hint-text').innerText = "تم إرسال رمز تحقق حقيقي إلى جيميلك (" + email + "). أدخل الرمز المكون من 6 أرقام:";
-      } else {
-        if (!password) return alert("يرجى إدخال كلمة المرور");
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return alert("فشل تسجيل الدخول: " + error.message);
-        checkSession();
-      }
+    function tileHTML(key, sizeClass = "w-14 h-14", iconSize = "text-2xl") {
+      const L = logoImages[key];
+      if (!L || !L.src) return iconTile(key, sizeClass, iconSize);
+      return `<div class="${sizeClass} rounded-2xl overflow-hidden shadow-lg border border-white/10 flex items-center justify-center ${L.pad}" style="background:${L.bg}">
+        <img src="${L.src}" alt="" loading="lazy" class="w-full h-full" style="object-fit:${L.fit}" data-key="${key}" data-size="${sizeClass}" data-icon="${iconSize}" onerror="imgFallback(this)" />
+      </div>`;
     }
 
-    
-    async function signInWithGoogle() {
-      if (!supabase) return alert("يرجى وضع روابط Supabase أولاً");
-      
+    const products = [
+      { id: 1,  title: "كاب كت برو (CapCut Pro)",        period: "أسبوع",              price: 30,  category: "video_edit",  logoKey: "capcut",     note: "تفعيل فوري لأدوات المونتاج وتأثيرات الذكاء الاصطناعي بدون علامة مائية" },
+      { id: 2,  title: "كاب كت برو (CapCut Pro)",        period: "شهر كامل",           price: 100, category: "video_edit",  logoKey: "capcut",     note: "حساب شهر كامل يعمل على الكمبيوتر والهاتف بجميع الميزات", tag: "الأكثر طلباً" },
+      { id: 3,  title: "اكسبريس في بي ان (ExpressVPN)",  period: "سنة كاملة (حساب)",   price: 100, category: "vpn",         logoKey: "expressvpn", note: "VPN سريع لتخطي الحجب والتصفح المشفر والمحمي" },
+      { id: 4,  title: "جيميناى بلس (Gemini Plus)",      period: "6 شهور",             price: 35,  category: "ai",          logoKey: "gemini",     note: "وصول لمميزات الذكاء الاصطناعي من جوجل بلس" },
+      { id: 5,  title: "جيميناى برو (Gemini Pro)",       period: "18 شهر",             price: 50,  category: "ai",          logoKey: "gemini",     note: "اشتراك طويل الأمد يمنحك مميزات Gemini Pro", tag: "أفضل قيمة" },
+      { id: 6,  title: "نور بلاى (Noor Play)",           period: "شهر (يوزر)",         price: 40,  category: "stream",      logoKey: "noorplay",   note: "ملف خاص لمتابعة المسلسلات التركية والتاريخية" },
+      { id: 7,  title: "نور بلاى (Noor Play)",           period: "سنة كاملة (يوزر)",   price: 180, category: "stream",      logoKey: "noorplay",   note: "سنة كاملة من المشاهدة بدون توقف مع توفير كبير" },
+      { id: 8,  title: "فيو بريميوم (Viu Premium)",      period: "شهر (يوزر)",         price: 30,  category: "stream",      logoKey: "viu",        note: "ملف خاص لمشاهدة الأفلام والمسلسلات الآسيوية والعربية بجودة HD" },
+      { id: 9,  title: "فيو بريميوم (Viu Premium)",      period: "سنة كاملة (يوزر)",   price: 100, category: "stream",      logoKey: "viu",        note: "سنة كاملة من الترفيه بأفضل سعر ممكن" },
+      { id: 10, title: "يوتيوب بريميوم (YouTube Premium)", period: "شهر",              price: 50,  category: "music_video", logoKey: "youtube",    note: "على الجيميل الشخصي بدون إعلانات + YouTube Music", tag: "الأكثر طلباً" },
+      { id: 11, title: "يوتيوب بريميوم (YouTube Premium)", period: "3 شهور",           price: 100, category: "music_video", logoKey: "youtube",    note: "على الجيميل الشخصي مع توفير وضمان طوال المدة" },
+      { id: 12, title: "سبوتيفاى بريميوم (Spotify Premium)", period: "شهر",            price: 60,  category: "music_video", logoKey: "spotify",    note: "على الحساب الشخصي بدون إعلانات مع تشغيل أوفلاين" },
+      { id: 13, title: "كانفا برو (Canva Pro)",          period: "سنة كاملة",          price: 35,  category: "design",      logoKey: "canva",      note: "فتح القوالب والعناصر المدفوعة وحذف الخلفيات بضغطة زر" },
+      { id: 14, title: "كانفا برو (Canva Pro)",          period: "3 سنين",             price: 45,  category: "design",      logoKey: "canva",      note: "اشتراك 3 سنوات مع ضمان ودعم كامل" },
+      { id: 15, title: "واتش إت (WATCH IT)",             period: "شهر (يوزر)",         price: 30,  category: "stream",      logoKey: "watchit",    note: "ملف خاص لمتابعة المسلسلات والأفلام والبرامج العربية" },
+      { id: 16, title: "واتش إت (WATCH IT)",             period: "سنة كاملة (يوزر)",   price: 180, category: "stream",      logoKey: "watchit",    note: "سنة كاملة من المشاهدة بدون توقف مع توفير كبير", tag: "أفضل قيمة" }
+    ];
+
+    let cart = [];            // [{id, qty}]
+    let activeCat = "all";
+
+    // ---------- Storage ----------
+    function loadCart() {
       try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.href.split('#')[0]
-          }
-        });
-        if (error) throw error;
-      } catch (err) {
-        alert("حدث خطأ في Google OAuth: " + err.message + "\nتأكد من تفعيل موفر Google وإدخال Client ID & Secret في لوحة تحكم Supabase.");
-      }
+        const raw = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+        cart = raw.filter(c => products.some(p => p.id === c.id) && c.qty > 0);
+      } catch (e) { cart = []; }
     }
+    function saveCart() { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} }
 
-    
-    function openForgotPassword() {
-      const emailVal = document.getElementById('auth-email').value.trim();
-      if (emailVal) document.getElementById('forgot-email-input').value = emailVal;
-      document.getElementById('auth-fields-container').style.display = 'none';
-      document.getElementById('forgot-password-container').style.display = 'flex';
+    // ---------- Tabs ----------
+    function renderTabs() {
+      const wrap = document.getElementById("catTabs");
+      wrap.innerHTML = categories.map(c => {
+        const on = c.key === activeCat;
+        const cls = on ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white" : "bg-slate-800/80 hover:bg-slate-700 text-slate-300";
+        return `<button onclick="setCategory('${c.key}')" class="px-4 py-2 rounded-xl text-sm font-bold shrink-0 transition-colors ${cls}">${c.label}</button>`;
+      }).join("");
     }
+    function setCategory(key) { activeCat = key; renderTabs(); renderProducts(); }
 
-    function cancelForgotPassword() {
-      document.getElementById('forgot-password-container').style.display = 'none';
-      document.getElementById('auth-fields-container').style.display = 'flex';
-    }
+    // ---------- Products ----------
+    function renderProducts() {
+      const grid = document.getElementById("productsGrid");
+      const q = document.getElementById("searchInput").value.trim().toLowerCase();
+      const sort = document.getElementById("sortSelect").value;
 
-    async function sendPasswordResetOtp() {
-      const email = document.getElementById('forgot-email-input').value.trim();
-      if (!email) return alert("يرجى إدخال بريدك الإلكتروني المسجل");
+      let list = products.filter(p =>
+        (activeCat === "all" || p.category === activeCat) &&
+        (!q || (p.title + " " + p.period + " " + p.note).toLowerCase().includes(q))
+      );
+      if (sort === "asc") list = [...list].sort((a, b) => a.price - b.price);
+      if (sort === "desc") list = [...list].sort((a, b) => b.price - a.price);
 
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) return alert("خطأ: " + error.message);
-
-      pendingVerificationEmail = email;
-      isRecoveryFlow = true;
-      document.getElementById('forgot-password-container').style.display = 'none';
-      document.getElementById('otp-container').style.display = 'flex';
-      document.getElementById('otp-hint-text').innerText = "تم إرسال كود استعادة كلمة المرور إلى جيميلك (" + email + "). أدخل الرمز المكون من 6 أرقام:";
-    }
-
-    async function verifyEmailOtp() {
-      const token = document.getElementById('otp-code-input').value.trim();
-      if (!token || token.length < 6) return alert("يرجى إدخال الرمز كاملاً (6 أرقام)");
-
-      if (isRecoveryFlow) {
-        const { data, error } = await supabase.auth.verifyOtp({
-          email: pendingVerificationEmail,
-          token: token,
-          type: 'recovery'
-        });
-        if (error) return alert("رمز التحقق غير صحيح: " + error.message);
-        
-        const newPassword = prompt("أدخل كلمة المرور الجديدة:");
-        if (newPassword && newPassword.length >= 6) {
-          await supabase.auth.updateUser({ password: newPassword });
-          alert("تم تحديث كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول.");
-          cancelOtp();
-        }
-      } else {
-        const { data, error } = await supabase.auth.verifyOtp({
-          email: pendingVerificationEmail,
-          token: token,
-          type: 'signup'
-        });
-
-        if (error) {
-          const retry = await supabase.auth.verifyOtp({
-            email: pendingVerificationEmail,
-            token: token,
-            type: 'email'
-          });
-          if (retry.error) return alert("رمز التحقق غير صحيح: " + retry.error.message);
-        }
-
-        alert("تم تأكيد الحساب بنجاح! مرحباً بك في LinkUp.");
-        cancelOtp();
-        checkSession();
-      }
-    }
-
-    function cancelOtp() {
-      document.getElementById('otp-container').style.display = 'none';
-      document.getElementById('auth-fields-container').style.display = 'flex';
-      document.getElementById('otp-code-input').value = '';
-    }
-
-    
-    async function checkSession() {
-      if (!supabase) return;
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session && session.user) {
-        currentUser = session.user;
-        document.getElementById('auth-screen').style.display = 'none';
-        initApp();
-      } else {
-        document.getElementById('auth-screen').style.display = 'flex';
-      }
-    }
-
-    async function logout() {
-      if (!supabase) return;
-      await supabase.auth.signOut();
-      currentUser = null;
-      document.getElementById('auth-screen').style.display = 'flex';
-    }
-
-    async function initApp() {
-      await Promise.all([
-        loadUserProfile(),
-        loadLivePosts(),
-        loadLiveStories(),
-        loadLiveReels(),
-        initRealtimeChat()
-      ]);
-    }
-
-    async function loadUserProfile() {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
-
-      if (profile) {
-        document.getElementById('prof-name').innerText = profile.full_name || profile.username;
-        document.getElementById('prof-handle').innerText = '@' + profile.username;
-        if (profile.avatar_url) document.getElementById('prof-avatar').src = profile.avatar_url;
-      }
-
-      const { count: followersCount } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', currentUser.id);
-      const { count: followingCount } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', currentUser.id);
-      const { count: postsCount } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
-
-      document.getElementById('stat-followers').innerText = followersCount || 0;
-      document.getElementById('stat-following').innerText = followingCount || 0;
-      document.getElementById('stat-posts').innerText = postsCount || 0;
-    }
-
-    async function loadLivePosts() {
-      const { data: posts, error } = await supabase
-        .from('posts')
-        .select(`
-          id, caption, media_url, media_type, created_at, user_id,
-          profiles:user_id (id, username, full_name, avatar_url),
-          likes (user_id)
-        `)
-        .eq('is_reel', false)
-        .order('created_at', { ascending: false });
-
-      if (error) return;
-
-      const container = document.getElementById('posts-feed-container');
-      container.innerHTML = '';
-
-      posts.forEach(post => {
-        const isLiked = post.likes && post.likes.some(l => l.user_id === currentUser.id);
-        const card = document.createElement('article');
-        card.className = 'post-card';
-        card.innerHTML = `
-          <div class="post-header">
-            <div class="post-user-info">
-              <img src="${post.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}" class="post-user-avatar">
-              <div>
-                <div style="font-weight: 600; font-size: 13.5px;">${post.profiles?.full_name || post.profiles?.username}</div>
-                <div style="font-size: 11px; color: var(--text-secondary);">@${post.profiles?.username}</div>
+      document.getElementById("emptyState").classList.toggle("hidden", list.length > 0);
+      grid.innerHTML = list.map((p, i) => `
+        <div class="card-in bg-[#0d1222] border border-slate-800 rounded-3xl p-5 flex flex-col justify-between hover:border-purple-500/40 transition-all hover:-translate-y-1" style="animation-delay:${i * 40}ms">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              ${tileHTML(p.logoKey)}
+              <div class="flex items-center gap-2">
+                ${p.tag ? `<span class="text-[10px] font-black text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2 py-1 rounded-full">${p.tag}</span>` : ""}
+                <span class="text-xs font-bold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full">${p.period}</span>
               </div>
             </div>
-            ${post.user_id !== currentUser.id ? `
-              <button class="follow-btn" onclick="toggleFollowLive('${post.user_id}', this)">+ متابعة</button>
-            ` : ''}
+            <h3 class="text-lg font-black text-white mb-2">${p.title}</h3>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed flex items-start gap-1.5">
+              <i class="fa-solid fa-circle-info text-purple-400 mt-0.5"></i><span>${p.note}</span>
+            </p>
           </div>
-          <div class="post-media-box">
-            <img src="${post.media_url}" class="post-media">
+          <div>
+            <div class="flex items-baseline justify-between pt-4 border-t border-slate-800/80 mb-4">
+              <div><span class="text-2xl font-black text-amber-400">${p.price}</span> <span class="text-xs font-bold text-slate-400">ج.م</span></div>
+              <span class="text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">متوفر</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2">
+              <button onclick="openOrderModal(${p.id})" class="col-span-3 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-bolt"></i><span>طلب فوري</span>
+              </button>
+              <button onclick="addToCart(${p.id})" aria-label="إضافة للسلة" class="col-span-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center transition-all">
+                <i class="fa-solid fa-cart-plus"></i>
+              </button>
+            </div>
           </div>
-          <div class="post-actions">
-            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLikeLive('${post.id}', this)">
-              <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
-            </button>
-          </div>
-          <div class="post-caption">
-            <b>${post.profiles?.username}</b> ${post.caption || ''}
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">${post.likes ? post.likes.length : 0} إعجاباً</div>
-          </div>
-        `;
-        container.appendChild(card);
+        </div>`).join("");
+    }
+
+    // ---------- Cart ----------
+    const cartTotal = () => cart.reduce((s, c) => s + products.find(p => p.id === c.id).price * c.qty, 0);
+    const cartCount = () => cart.reduce((s, c) => s + c.qty, 0);
+
+    function addToCart(id) {
+      const found = cart.find(c => c.id === id);
+      if (found) found.qty++; else cart.push({ id, qty: 1 });
+      const p = products.find(x => x.id === id);
+      afterCartChange();
+      showToast(`تمت إضافة "${p.title}" للسلة`);
+    }
+    function changeQty(id, delta) {
+      const c = cart.find(x => x.id === id);
+      if (!c) return;
+      c.qty += delta;
+      if (c.qty <= 0) cart = cart.filter(x => x.id !== id);
+      afterCartChange();
+    }
+    function removeFromCart(id) { cart = cart.filter(c => c.id !== id); afterCartChange(); }
+    function clearCart() { cart = []; afterCartChange(); }
+    function afterCartChange() { saveCart(); updateCartBadge(); renderCartItems(); }
+
+    function updateCartBadge() {
+      const badge = document.getElementById("cartCountBadge");
+      const n = cartCount();
+      badge.textContent = n;
+      badge.classList.toggle("hidden", n === 0);
+    }
+
+    function renderCartItems() {
+      const list = document.getElementById("cartItemsList");
+      if (cart.length === 0) {
+        list.innerHTML = `<div class="text-center py-12 text-slate-500 text-sm"><i class="fa-solid fa-bag-shopping text-3xl mb-3 block opacity-40"></i>السلة فارغة حالياً</div>`;
+      } else {
+        list.innerHTML = cart.map(c => {
+          const p = products.find(x => x.id === c.id);
+          return `
+          <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-2xl flex items-center gap-3">
+            ${tileHTML(p.logoKey, "w-11 h-11 shrink-0", "text-base")}
+            <div class="flex-1 min-w-0">
+              <h4 class="text-xs font-black text-white truncate">${p.title}</h4>
+              <span class="text-[11px] text-purple-300">${p.period}</span>
+              <p class="text-xs font-black text-amber-400 mt-0.5">${p.price * c.qty} ج.م</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="changeQty(${p.id}, -1)" aria-label="تقليل" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm">−</button>
+              <span class="w-5 text-center text-xs font-black">${c.qty}</span>
+              <button onclick="changeQty(${p.id}, 1)" aria-label="زيادة" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm">+</button>
+            </div>
+            <button onclick="removeFromCart(${p.id})" aria-label="حذف" class="text-red-400 hover:text-red-300 p-1"><i class="fa-solid fa-trash-can text-sm"></i></button>
+          </div>`;
+        }).join("");
+      }
+      document.getElementById("cartTotalPrice").textContent = `${cartTotal()} ج.م`;
+    }
+
+    function toggleCartDrawer() {
+      const drawer = document.getElementById("cartDrawer");
+      const overlay = document.getElementById("cartOverlay");
+      const closed = drawer.classList.contains("-translate-x-full");
+      drawer.classList.toggle("-translate-x-full", !closed);
+      overlay.classList.toggle("hidden", !closed);
+      if (closed) renderCartItems();
+    }
+
+    // ---------- Order helpers ----------
+    function openTelegram(text) {
+      window.open(`https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(text)}`, "_blank");
+    }
+    function openMessenger() { if (MESSENGER_URL) window.open(MESSENGER_URL, "_blank"); }
+
+    let currentModalProduct = null;
+    function openOrderModal(id) {
+      const p = products.find(x => x.id === id);
+      currentModalProduct = p;
+      document.getElementById("modalLogoContainer").innerHTML = tileHTML(p.logoKey, "w-16 h-16", "text-3xl");
+      document.getElementById("modalTitle").textContent = p.title;
+      document.getElementById("modalPeriod").textContent = `المدة: ${p.period}`;
+      document.getElementById("modalPrice").textContent = `${p.price} جنيه`;
+
+      const text = `مرحباً Premiumak 👋\nأرغب في شراء اشتراك:\n📌 ${p.title}\n⏳ المدة: ${p.period}\n💰 السعر: ${p.price} ج.م\n\nبرجاء تزويدي بتفاصيل الدفع للتفعيل.`;
+      document.getElementById("modalBtnTelegram").onclick = () => { copyText(text); openTelegram(text); closeOrderModal(); };
+      document.getElementById("modalBtnMessenger").onclick = () => { copyText(text); openMessenger(); closeOrderModal(); };
+
+      const m = document.getElementById("orderModal");
+      m.classList.remove("hidden"); m.classList.add("flex");
+    }
+    function closeOrderModal() {
+      const m = document.getElementById("orderModal");
+      m.classList.add("hidden"); m.classList.remove("flex");
+    }
+
+    function checkoutCart(platform) {
+      if (cart.length === 0) { showToast("السلة فارغة، أضف بعض المنتجات أولاً"); return; }
+      let text = "مرحباً Premiumak 👋\nأود طلب الاشتراكات التالية:\n\n";
+      cart.forEach((c, i) => {
+        const p = products.find(x => x.id === c.id);
+        text += `${i + 1}. ${p.title} (${p.period}) × ${c.qty} - ${p.price * c.qty} ج.م\n`;
+      });
+      text += `\n💵 الإجمالي: ${cartTotal()} ج.م\nبرجاء إرسال تفاصيل الدفع.`;
+      copyText(text);
+      if (platform === "telegram") openTelegram(text); else openMessenger();
+      toggleCartDrawer();
+    }
+
+    function copyText(text) {
+      const done = () => showToast("تم نسخ تفاصيل الطلب");
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(() => {});
+        return;
+      }
+      try {
+        const t = document.createElement("textarea");
+        t.value = text; document.body.appendChild(t); t.select();
+        document.execCommand("copy"); document.body.removeChild(t); done();
+      } catch (e) {}
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toastMsg").textContent = msg;
+      toast.classList.remove("opacity-0", "pointer-events-none");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add("opacity-0", "pointer-events-none"), 2500);
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        closeOrderModal();
+        if (!document.getElementById("cartDrawer").classList.contains("-translate-x-full")) toggleCartDrawer();
+      }
+    });
+
+    // ---------- Init ----------
+    if (MESSENGER_URL) {
+      const hm = document.getElementById("heroMessenger");
+      hm.href = MESSENGER_URL; hm.classList.remove("hidden"); hm.classList.add("inline-flex");
+      ["modalBtnMessenger", "cartMessengerBtn"].forEach(id => {
+        const el = document.getElementById(id); el.classList.remove("hidden"); el.classList.add("flex");
       });
     }
-
-    async function loadLiveStories() {
-      const { data: stories } = await supabase
-        .from('stories')
-        .select('id, media_url, profiles:user_id(username, avatar_url)')
-        .order('created_at', { ascending: false });
-
-      const tray = document.getElementById('stories-tray');
-      tray.innerHTML = `
-        <div class="story-item" onclick="triggerStoryUpload()">
-          <div class="story-ring add-story"><i class="fa-solid fa-plus" style="color: var(--accent-gold);"></i></div>
-          <span class="story-username">قصتك</span>
-        </div>
-      `;
-
-      if (stories) {
-        stories.forEach(st => {
-          const item = document.createElement('div');
-          item.className = 'story-item';
-          item.innerHTML = `
-            <div class="story-ring">
-              <img src="${st.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}" class="story-avatar">
-            </div>
-            <span class="story-username">${st.profiles?.username}</span>
-          `;
-          tray.appendChild(item);
-        });
-      }
-    }
-
-    async function loadLiveReels() {
-      const { data: reels } = await supabase
-        .from('posts')
-        .select('id, caption, media_url, profiles:user_id(username)')
-        .eq('is_reel', true)
-        .order('created_at', { ascending: false });
-
-      const container = document.getElementById('reels-feed-container');
-      container.innerHTML = '';
-
-      if (reels) {
-        reels.forEach(reel => {
-          const item = document.createElement('div');
-          item.className = 'reel-container';
-          item.innerHTML = `
-            <video class="reel-video" src="${reel.media_url}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
-            <div class="reel-overlay">
-              <h4 style="color: var(--accent-gold); font-size: 14px;">@${reel.profiles?.username}</h4>
-              <p style="font-size: 13px;">${reel.caption || ''}</p>
-            </div>
-          `;
-          container.appendChild(item);
-        });
-      }
-    }
-
-    async function toggleLikeLive(postId, btn) {
-      const { data: existingLike } = await supabase
-        .from('likes')
-        .select('*')
-        .eq('post_id', postId)
-        .eq('user_id', currentUser.id)
-        .single();
-
-      if (existingLike) {
-        await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
-      } else {
-        await supabase.from('likes').insert([{ post_id: postId, user_id: currentUser.id }]);
-      }
-      loadLivePosts();
-    }
-
-    async function toggleFollowLive(targetUserId, btn) {
-      const { data: existingFollow } = await supabase
-        .from('follows')
-        .select('*')
-        .eq('follower_id', currentUser.id)
-        .eq('following_id', targetUserId)
-        .single();
-
-      if (existingFollow) {
-        await supabase.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', targetUserId);
-      } else {
-        await supabase.from('follows').insert([{ follower_id: currentUser.id, following_id: targetUserId }]);
-      }
-      loadUserProfile();
-      loadLivePosts();
-    }
-
-    function openCreateSheet() { document.getElementById('create-modal').classList.add('active'); }
-    function closeModals() { document.getElementById('create-modal').classList.remove('active'); }
-
-    function triggerUpload(type, isReel) {
-      pendingUploadConfig = { type, isReel };
-      const fileInput = document.getElementById('media-file-input');
-      fileInput.accept = type === 'image' ? 'image/*' : 'video/*';
-      fileInput.click();
-    }
-
-    async function handleFileSelected(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const caption = prompt("اكتب وصفاً للمنشور:");
-      closeModals();
-
-      const ext = file.name.split('.').pop();
-      const path = `posts/${currentUser.id}/${Date.now()}.${ext}`;
-
-      const { error: uploadError } = await supabase.storage.from('posts').upload(path, file);
-      if (uploadError) return alert("فشل الرفع: " + uploadError.message);
-
-      const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(path);
-
-      await supabase.from('posts').insert([{
-        user_id: currentUser.id,
-        caption: caption,
-        media_url: publicUrl,
-        media_type: pendingUploadConfig.type,
-        is_reel: pendingUploadConfig.isReel
-      }]);
-
-      alert("تم النشر بنجاح!");
-      if (pendingUploadConfig.isReel) loadLiveReels();
-      else loadLivePosts();
-    }
-
-    function triggerStoryUpload() { document.getElementById('story-file-input').click(); }
-
-    async function handleStorySelected(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const ext = file.name.split('.').pop();
-      const path = `stories/${currentUser.id}/${Date.now()}.${ext}`;
-
-      const { error: uploadError } = await supabase.storage.from('posts').upload(path, file);
-      if (uploadError) return alert("فشل الرفع: " + uploadError.message);
-
-      const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(path);
-
-      await supabase.from('stories').insert([{
-        user_id: currentUser.id,
-        media_url: publicUrl,
-        media_type: file.type.includes('video') ? 'video' : 'image'
-      }]);
-
-      alert("تمت إضافة القصة بنجاح!");
-      loadLiveStories();
-    }
-
-    async function initRealtimeChat() {
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .limit(30);
-
-      const container = document.getElementById('chat-messages-container');
-      container.innerHTML = '';
-      if (messages) {
-        messages.forEach(msg => appendMessageUI(msg.content, msg.sender_id === currentUser.id));
-      }
-
-      if (globalChatChannel) supabase.removeChannel(globalChatChannel);
-
-      globalChatChannel = supabase
-        .channel('public:messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-          const newMsg = payload.new;
-          if (newMsg.sender_id !== currentUser.id) {
-            appendMessageUI(newMsg.content, false);
-          }
-        })
-        .subscribe();
-    }
-
-    async function sendRealtimeMessage() {
-      const input = document.getElementById('chat-input-text');
-      const text = input.value.trim();
-      if (!text) return;
-
-      input.value = '';
-      appendMessageUI(text, true);
-
-      await supabase.from('messages').insert([{
-        conversation_id: "00000000-0000-0000-0000-000000000000",
-        sender_id: currentUser.id,
-        content: text
-      }]);
-    }
-
-    function appendMessageUI(text, isMe) {
-      const container = document.getElementById('chat-messages-container');
-      const bubble = document.createElement('div');
-      bubble.className = `message-bubble ${isMe ? 'sent' : 'received'}`;
-      bubble.innerText = text;
-      container.appendChild(bubble);
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function switchTab(screenId, tabBtnElement = null) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(screenId).classList.add('active');
-
-      if (tabBtnElement) {
-        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-        tabBtnElement.classList.add('active');
-      }
-
-      if (screenId !== 'screen-reels') {
-        document.querySelectorAll('.reel-video').forEach(v => v.pause());
-      } else {
-        const first = document.querySelector('.reel-video');
-        if (first) first.play();
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', checkSession);
+    document.getElementById("statProducts").textContent = products.length;
+    document.getElementById("searchInput").addEventListener("input", renderProducts);
+    document.getElementById("sortSelect").addEventListener("change", renderProducts);
+    loadCart();
+    renderTabs();
+    renderProducts();
+    updateCartBadge();
+    renderCartItems();
   </script>
 </body>
 </html>
